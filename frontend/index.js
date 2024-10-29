@@ -44,8 +44,8 @@ function loadTexture(key, src) {
             texturesLoaded++;
             resolve();
         };
-        textures[key].onerror = reject;
-        textures[key].src = src;
+        textures[key].onerror = () => reject(`Failed to load texture: ${src}`);
+        textures[key].src = `assets/${src}`;
     });
 }
 
@@ -86,7 +86,13 @@ function castRay(angle) {
 
 function drawWall(x, height, texture, texX) {
     const wallTop = (SCREEN_HEIGHT - height) / 2;
-    ctx.drawImage(texture, texX, 0, 1, 64, x, wallTop, 1, height);
+    if (texture.complete && texture.naturalHeight !== 0) {
+        ctx.drawImage(texture, texX, 0, 1, 64, x, wallTop, 1, height);
+    } else {
+        // Fallback: draw a solid color rectangle
+        ctx.fillStyle = '#444';
+        ctx.fillRect(x, wallTop, 1, height);
+    }
 }
 
 function drawSprite(enemy) {
@@ -99,7 +105,13 @@ function drawSprite(enemy) {
     const x = (spriteAngle / FOV + 0.5) * SCREEN_WIDTH - size / 2;
     const y = SCREEN_HEIGHT / 2 - size / 2;
 
-    ctx.drawImage(textures.enemy, x, y, size, size);
+    if (textures.enemy.complete && textures.enemy.naturalHeight !== 0) {
+        ctx.drawImage(textures.enemy, x, y, size, size);
+    } else {
+        // Fallback: draw a solid color rectangle
+        ctx.fillStyle = '#f00';
+        ctx.fillRect(x, y, size, size);
+    }
 }
 
 function drawScene() {
@@ -207,5 +219,7 @@ Promise.all([
     gameLoop();
 }).catch(error => {
     console.error('Failed to load textures:', error);
-    loadingElement.textContent = 'Failed to load game resources. Please refresh the page.';
+    loadingElement.textContent = `Failed to load game resources: ${error}. Using fallback textures.`;
+    // Start the game loop even if textures fail to load
+    gameLoop();
 });
