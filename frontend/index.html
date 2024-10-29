@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Doom Simulator</title>
+    <title>Doom-like AI Simulator</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
     <div id="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="hud">
-            <p>Health: <span id="health">100</span></p>
-            <p>Score: <span id="score">0</span></p>
+            <div id="status-bar">
+                <div id="face"></div>
+                <div id="health">100%</div>
+                <div id="ammo">50</div>
+            </div>
         </div>
     </div>
     <div id="loading" class="hidden">Loading...</div>
