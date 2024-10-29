@@ -35,8 +35,19 @@ const textures = {
     enemy: new Image()
 };
 
-textures.wall.src = 'https://raw.githubusercontent.com/mdn/dom-examples/master/webgl-examples/tutorial/sample6/texture.png';
-textures.enemy.src = 'https://opengameart.org/sites/default/files/styles/medium/public/demon_idle_0.png';
+let texturesLoaded = 0;
+const totalTextures = Object.keys(textures).length;
+
+function loadTexture(key, src) {
+    return new Promise((resolve, reject) => {
+        textures[key].onload = () => {
+            texturesLoaded++;
+            resolve();
+        };
+        textures[key].onerror = reject;
+        textures[key].src = src;
+    });
+}
 
 function toRadians(deg) {
     return deg * Math.PI / 180;
@@ -188,5 +199,13 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-gameLoop();
-setInterval(updateEnemyPositions, 1000);
+Promise.all([
+    loadTexture('wall', 'wall_texture.png'),
+    loadTexture('enemy', 'enemy_texture.png')
+]).then(() => {
+    loadingElement.classList.add('hidden');
+    gameLoop();
+}).catch(error => {
+    console.error('Failed to load textures:', error);
+    loadingElement.textContent = 'Failed to load game resources. Please refresh the page.';
+});
